@@ -1,0 +1,64 @@
+- name: Install powershell-yaml dependency
+  win_psmodule:
+    name: powershell-yaml
+
+- name: Check if Atomic Red Team execution framework is installed
+  win_stat:
+    path: "{{ atomic_execution_framework_install_path }}\\invoke-atomicredteam"
+  register: execution_framework_path
+
+- name: Install Execution Framework
+  win_shell: |
+    IEX (IWR 'https://raw.githubusercontent.com/redcanaryco/invoke-atomicredteam/master/install-atomicredteam.ps1' -UseBasicParsing);
+    Install-AtomicRedTeam -InstallPath {{ atomic_execution_framework_install_path }}
+  when: not execution_framework_path.stat.exists
+
+- name: Install Execution Framework (Force)
+  win_shell: |
+    IEX (IWR 'https://raw.githubusercontent.com/redcanaryco/invoke-atomicredteam/master/install-atomicredteam.ps1' -UseBasicParsing);
+    Install-AtomicRedTeam -InstallPath {{ atomic_execution_framework_install_path }} -Force
+  tags: [ never, force ]
+
+- name: Check powershell profile
+  win_shell: Select-String -Path "{{ powershell_profile }}" -Pattern Invoke-AtomicTest
+  register: profile_set
+  changed_when: False
+  when: powershell_profile_install
+
+- name: Set powershell profile
+  win_lineinfile:
+    path: "{{ powershell_profile }}"
+    create: yes
+    regexp: '.*Invoke-AtomicTest '
+    line: "{{ item }}"
+  when: powershell_profile_install and profile_set.stdout_lines|length == 0
+  loop:
+    - Import-Module "{{ atomic_execution_framework_install_path }}\invoke-atomicredteam\Invoke-AtomicRedTeam.psd1" -Force
+    - $PSDefaultParameterValues = @{"Invoke-AtomicTest:PathToAtomicsFolder"="{{ atomics_install_path }}\atomics"}
+
+- name: Check Microsoft Defender exclusions
+  win_shell: $Preferences = Get-MpPreference; $Preferences.ExclusionPath | Out-String | Select-String -SimpleMatch -Pattern "{{ atomics_install_path }}"
+  register: defender_exclusion_paths
+  changed_when: False
+  when: atomics_defender_exclusion
+
+- name: Add Microsoft Defender exclusion path for Atomics folder
+  win_shell: Add-MpPreference -ExclusionPath "{{ atomics_install_path }}\atomics"
+  when: atomics_defender_exclusion and defender_exclusion_paths.stdout_lines|length == 0
+
+- name: Check if Atomics are installed
+  win_stat:
+    path: "{{ atomics_install_path }}\\atomics"
+  register: tests_path
+
+- name: Install Atomics
+  win_shell: |
+    IEX (IWR 'https://raw.githubusercontent.com/redcanaryco/invoke-atomicredteam/master/install-atomicsfolder.ps1' -UseBasicParsing);
+    Install-AtomicsFolder -InstallPath "{{ atomics_install_path }}" -RepoOwner "{{ atomics_repo_owner }}" -Branch "{{ atomics_repo_branch }}"
+  when: not tests_path.stat.exists
+
+- name: Install Atomics (Force)
+  win_shell: |
+    IEX (IWR 'https://raw.githubusercontent.com/redcanaryco/invoke-atomicredteam/master/install-atomicsfolder.ps1' -UseBasicParsing);
+    Install-AtomicsFolder -InstallPath "{{ atomics_install_path }}" -RepoOwner "{{ atomics_repo_owner }}" -Branch "{{ atomics_repo_branch }}"
+  tags: [ never, force ]
