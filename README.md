@@ -1,6 +1,12 @@
 ansible-role-atomic-red-team
 =========
 
+[![GitHub license](https://img.shields.io/github/license/j91321/ansible-role-atomic-red-team?style=flat-square)](https://github.com/j91321/ansible-role-atomic-red-team/blob/main/LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/j91321/ansible-role-atomic-red-team.svg?style=flat-square)](https://github.com/j91321/ansible-role-atomic-red-team/commit/main)
+[![Build role](https://github.com/j91321/ansible-role-atomic-red-team/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/j91321/ansible-role-atomic-red-team/actions/workflows/build.yml)
+[![Twitter](https://img.shields.io/twitter/follow/j91321.svg?style=social&label=Follow)](https://twitter.com/j91321)
+
+
 An Ansible role that installs Atomic Red Team (both execution framework and tests).
 
 Supported platforms:

@@ -1,5 +1,5 @@
 galaxy_info:
-  role_name: atomic-red-team
+  role_name: atomic_red_team
   author: Ján Trenčanský
   description: Install Atomic Red Team framework
   company:
