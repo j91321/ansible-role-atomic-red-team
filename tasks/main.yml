@@ -19,7 +19,13 @@
     Install-AtomicRedTeam -InstallPath {{ atomic_execution_framework_install_path }} -Force
   tags: [ never, force ]
 
-- name: Check powershell profile
+- name: Create powershell profile
+  win_file:
+    path: "{{ powershell_profile }}"
+    state: touch
+  when: powershell_profile_install
+
+- name: Check powershell profile content
   win_shell: Select-String -Path "{{ powershell_profile }}" -Pattern Invoke-AtomicTest
   register: profile_set
   changed_when: False
@@ -43,7 +49,9 @@
   when: atomics_defender_exclusion
 
 - name: Add Microsoft Defender exclusion path for Atomics folder
-  win_shell: Add-MpPreference -ExclusionPath "{{ atomics_install_path }}\atomics"
+  win_shell: |
+    Add-MpPreference -ExclusionPath "{{ atomics_install_path }}\atomics"
+    Add-MpPreference -ExclusionPath "{{ atomics_install_path }}\tmp"
   when: atomics_defender_exclusion and defender_exclusion_paths.stdout_lines|length == 0
 
 - name: Check if Atomics are installed
