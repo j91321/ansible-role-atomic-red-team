@@ -1,11 +1,8 @@
-name: Test role
+name: Build
 on:
   push:
     branches:
-      - "*"
-      - "!main"
-    pull_request:
-      branches: [ main ]
+      - "main"
 
 jobs:
   lint:
@@ -54,3 +51,11 @@ jobs:
         shell: msys2 {0}
         run: |
           ansible-playbook -i ansible-role-atomic-red-team/.github/scripts/inventory ansible-role-atomic-red-team/.github/scripts/playbook.yml
+    deploy:
+      needs: test
+      runs-on: ubuntu-latest
+      steps:
+        - name: Publish on Ansible Galaxy
+          uses: robertdebock/galaxy-action@1.0.1
+          with:
+            galaxy_api_key: ${{ secrets.galaxy_api_key }}
