@@ -1,4 +1,6 @@
 - name: AtomicRedTeam test playbook
+  vars:
+    powershell_profile_install: false
   hosts:
     - localhost
   roles:
