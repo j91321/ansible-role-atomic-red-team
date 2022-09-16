@@ -1,8 +1,8 @@
-- name: Install powershell-yaml dependency
+- name: Install powershell-yaml Dependency
   community.windows.win_psmodule:
     name: powershell-yaml
 
-- name: Check if Atomic Red Team execution framework is installed
+- name: Check if Atomic Red Team Execution Framework is Installed
   ansible.windows.win_stat:
     path: "{{ atomic_execution_framework_install_path }}\\invoke-atomicredteam"
   register: execution_framework_path
@@ -17,44 +17,44 @@
   ansible.windows.win_shell: |
     IEX (IWR 'https://raw.githubusercontent.com/redcanaryco/invoke-atomicredteam/master/install-atomicredteam.ps1' -UseBasicParsing);
     Install-AtomicRedTeam -InstallPath {{ atomic_execution_framework_install_path }} -Force
-  tags: [ never, force ]
+  tags: [never, force]
 
-- name: Create powershell profile
+- name: Create Powershell Profile
   ansible.windows.win_file:
     path: "{{ powershell_profile }}"
     state: touch
   when: powershell_profile_install
 
-- name: Check powershell profile content
+- name: Check Powershell Profile Content
   ansible.windows.win_shell: Select-String -Path "{{ powershell_profile }}" -Pattern Invoke-AtomicTest
   register: profile_set
-  changed_when: False
+  changed_when: false
   when: powershell_profile_install
 
-- name: Set powershell profile
+- name: Set Powershell Profile
   community.windows.win_lineinfile:
     path: "{{ powershell_profile }}"
-    create: yes
+    create: true
     regexp: '.*Invoke-AtomicTest '
     line: "{{ item }}"
-  when: powershell_profile_install and profile_set.stdout_lines|length == 0
+  when: powershell_profile_install and profile_set.stdout_lines | length == 0
   loop:
     - Import-Module "{{ atomic_execution_framework_install_path }}\invoke-atomicredteam\Invoke-AtomicRedTeam.psd1" -Force
     - $PSDefaultParameterValues = @{"Invoke-AtomicTest:PathToAtomicsFolder"="{{ atomics_install_path }}\atomics"}
 
-- name: Check Microsoft Defender exclusions
+- name: Check Microsoft Defender Exclusions
   ansible.windows.win_shell: $Preferences = Get-MpPreference; $Preferences.ExclusionPath | Out-String | Select-String -SimpleMatch -Pattern "{{ atomics_install_path }}"
   register: defender_exclusion_paths
-  changed_when: False
+  changed_when: false
   when: atomics_defender_exclusion
 
-- name: Add Microsoft Defender exclusion path for Atomics folder
+- name: Add Microsoft Defender Exclusion Path for Atomics Folder
   ansible.windows.win_shell: |
     Add-MpPreference -ExclusionPath "{{ atomics_install_path }}\atomics"
     Add-MpPreference -ExclusionPath "{{ atomics_install_path }}\tmp"
-  when: atomics_defender_exclusion and defender_exclusion_paths.stdout_lines|length == 0
+  when: atomics_defender_exclusion and defender_exclusion_paths.stdout_lines | length == 0
 
-- name: Check if Atomics are installed
+- name: Check if Atomics are Installed
   ansible.windows.win_stat:
     path: "{{ atomics_install_path }}\\atomics"
   register: tests_path
@@ -69,4 +69,4 @@
   ansible.windows.win_shell: |
     IEX (IWR 'https://raw.githubusercontent.com/redcanaryco/invoke-atomicredteam/master/install-atomicsfolder.ps1' -UseBasicParsing);
     Install-AtomicsFolder -InstallPath "{{ atomics_install_path }}" -RepoOwner "{{ atomics_repo_owner }}" -Branch "{{ atomics_repo_branch }}"
-  tags: [ never, force ]
+  tags: [never, force]
