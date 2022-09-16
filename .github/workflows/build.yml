@@ -20,8 +20,6 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          path: "ansible-role-atomic-red-team"
       - uses: msys2/setup-msys2@v2
         with:
           update: true
@@ -48,7 +46,7 @@ jobs:
       - name: Run Ansible playbook
         shell: msys2 {0}
         run: |
-          ansible-playbook -i ansible-role-atomic-red-team/.github/scripts/inventory ansible-role-atomic-red-team/.github/scripts/playbook.yml
+          ansible-playbook -i .github/scripts/inventory .github/scripts/playbook.yml
 
   deploy:
     needs: test

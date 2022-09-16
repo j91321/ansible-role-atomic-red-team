@@ -49,4 +49,4 @@ jobs:
       - name: Run Ansible playbook
         shell: msys2 {0}
         run: |
-          ansible-playbook -i ansible-role-atomic-red-team/.github/scripts/inventory ansible-role-atomic-red-team/.github/scripts/playbook.yml
+          ansible-playbook -i .github/scripts/inventory .github/scripts/playbook.yml
