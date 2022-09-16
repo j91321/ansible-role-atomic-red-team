@@ -13,12 +13,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-         path: "ansible-role-atomic-red-team"
+      - name: Install Windows Collection
+        run: ansible-galaxy collection install community.windows
       - name: Lint Ansible Playbook
-        uses: ansible/ansible-lint-action@master
-        with:
-          targets: "ansible-role-atomic-red-team"
+        uses: ansible-community/ansible-lint-action@v6.5.2
 
   test:
     needs: lint
